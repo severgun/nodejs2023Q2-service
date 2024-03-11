@@ -45,13 +45,6 @@ export class ArtistController {
 
   @Post()
   createArtist(@Body() dto: CreateArtistDto, @Res() res: Response) {
-    if (!dto.name || !dto.grammy) {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('Required fields are not provided.');
-      return;
-    }
-
     const newArtist = this.artistService.createArtist(dto);
 
     res.status(HttpStatus.CREATED).send(newArtist);
