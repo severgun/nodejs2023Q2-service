@@ -45,13 +45,6 @@ export class UserController {
 
   @Post()
   createUser(@Body() dto: CreateUserDto, @Res() res: Response) {
-    if (!dto.login || !dto.password) {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('Required fields are not provided.');
-      return;
-    }
-
     const newUser = this.userService.createUser(dto);
 
     res.status(HttpStatus.CREATED).send(filterOutPassword(newUser));
@@ -65,13 +58,6 @@ export class UserController {
   ) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
-      return;
-    }
-
-    if (!dto.oldPassword || !dto.newPassword) {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('Required fields are not provided.');
       return;
     }
 
