@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   HttpStatus,
   Param,
   Post,
@@ -40,19 +39,14 @@ export class AlbumController {
       return;
     }
 
-    return album;
+    res.status(HttpStatus.OK).send(album);
   }
 
   @Post()
-  createAlbum(@Body() dto: CreateAlbumDto, @Res() res: Response): Album {
-    if (!dto.name || !dto.year || !dto.artistId) {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('Required fields are not provided.');
-      return;
-    }
+  createAlbum(@Body() dto: CreateAlbumDto, @Res() res: Response) {
+    const newAlbum = this.albumService.createAlbum(dto);
 
-    return this.albumService.createAlbum(dto);
+    res.status(HttpStatus.CREATED).send(newAlbum);
   }
 
   @Put(':id')
@@ -72,11 +66,12 @@ export class AlbumController {
       return;
     }
 
-    return this.albumService.updateAlbum(dto, id);
+    const updatedAlbum = this.albumService.updateAlbum(dto, id);
+
+    res.status(HttpStatus.OK).send(updatedAlbum);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   deleteAlbum(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
@@ -89,6 +84,8 @@ export class AlbumController {
       return;
     }
 
-    this.albumService.deleteAlbum(id);
+    this.albumService.deleteAlbum(id)
+      ? res.status(HttpStatus.NO_CONTENT).send()
+      : res.status(HttpStatus.NOT_FOUND).send('Album not found.');
   }
 }

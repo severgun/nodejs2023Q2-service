@@ -44,7 +44,7 @@ export class AlbumService {
     return album;
   }
 
-  deleteAlbum(id: string) {
-    this.albums.delete(id);
+  deleteAlbum(id: string): boolean {
+    return this.albums.delete(id);
   }
 }
