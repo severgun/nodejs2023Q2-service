@@ -1,4 +1,5 @@
 import { IsNumber, IsString, ValidateIf } from 'class-validator';
+import { ApiProperty, ApiBody } from '@nestjs/swagger';
 
 export class CreateTrackDto {
   @IsString()
