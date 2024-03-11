@@ -46,7 +46,7 @@ export class TrackService {
     return track;
   }
 
-  deleteTrack(id: string) {
-    this.tracks.delete(id);
+  deleteTrack(id: string): boolean {
+    return this.tracks.delete(id);
   }
 }

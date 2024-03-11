@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   HttpStatus,
   Param,
   Post,
@@ -26,7 +25,7 @@ export class TrackController {
   }
 
   @Get(':id')
-  getById(@Param('id') id: string, @Res() res: Response): Track {
+  getById(@Param('id') id: string, @Res() res: Response): void {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
@@ -40,19 +39,14 @@ export class TrackController {
       return;
     }
 
-    return track;
+    res.status(HttpStatus.OK).send(track);
   }
 
   @Post()
-  createTrack(@Body() dto: CreateTrackDto, @Res() res: Response): Track {
-    if (!dto.name || !dto.albumId || !dto.artistId || !dto.duration) {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('Required fields are not provided.');
-      return;
-    }
+  createTrack(@Body() dto: CreateTrackDto, @Res() res: Response): void {
+    const newTrack = this.trackService.createTrack(dto);
 
-    return this.trackService.createTrack(dto);
+    res.status(HttpStatus.CREATED).send(newTrack);
   }
 
   @Put(':id')
@@ -60,7 +54,7 @@ export class TrackController {
     @Body() dto: UpdateTrackDto,
     @Param('id') id: string,
     @Res() res: Response,
-  ): Track {
+  ): void {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
       return;
@@ -72,11 +66,12 @@ export class TrackController {
       return;
     }
 
-    return this.trackService.updateTrack(dto, id);
+    const updatedTrack = this.trackService.updateTrack(dto, id);
+
+    res.status(HttpStatus.OK).send(updatedTrack);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   deleteTrack(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
@@ -89,6 +84,8 @@ export class TrackController {
       return;
     }
 
-    this.trackService.deleteTrack(id);
+    this.trackService.deleteTrack(id)
+      ? res.status(HttpStatus.NO_CONTENT).send()
+      : res.status(HttpStatus.NOT_FOUND).send('Track not found.');
   }
 }
