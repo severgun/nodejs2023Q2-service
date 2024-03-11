@@ -56,12 +56,39 @@ export class FavoritesController {
       : res.status(HttpStatus.UNPROCESSABLE_ENTITY).send();
   }
 
-  // @Delete('artist/:id')
-  // deleteFavoriteArtist(): void {}
+  @Delete('artist/:id')
+  deleteFavoriteArtist(@Param('id') id: string, @Res() res: Response): void {
+    if (!validate(id)) {
+      res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
+      return;
+    }
 
-  // @Delete('album/:id')
-  // deleteFavoriteAlbum(): void {}
+    this.favoritesService.deleteFavoriteArtist(id)
+      ? res.status(HttpStatus.NO_CONTENT).send()
+      : res.status(HttpStatus.NOT_FOUND).send();
+  }
 
-  // @Delete('track/:id')
-  // deleteFavoriteTrack(): void {}
+  @Delete('album/:id')
+  deleteFavoriteAlbum(@Param('id') id: string, @Res() res: Response): void {
+    if (!validate(id)) {
+      res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
+      return;
+    }
+
+    this.favoritesService.deleteFavoriteAlbum(id)
+      ? res.status(HttpStatus.NO_CONTENT).send()
+      : res.status(HttpStatus.NOT_FOUND).send();
+  }
+
+  @Delete('track/:id')
+  deleteFavoriteTrack(@Param('id') id: string, @Res() res: Response): void {
+    if (!validate(id)) {
+      res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
+      return;
+    }
+
+    this.favoritesService.deleteFavoriteTrack(id)
+      ? res.status(HttpStatus.NO_CONTENT).send()
+      : res.status(HttpStatus.NOT_FOUND).send();
+  }
 }

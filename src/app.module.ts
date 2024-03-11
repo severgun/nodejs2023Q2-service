@@ -6,6 +6,7 @@ import { ArtistModule } from './artist/artist.module';
 import { TrackModule } from './track/track.module';
 import { AlbumModule } from './album/album.module';
 import { FavoritesModule } from './favs/favs.module';
+import { StoreModule } from './store/store.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { FavoritesModule } from './favs/favs.module';
     TrackModule,
     AlbumModule,
     FavoritesModule,
+    StoreModule,
   ],
   controllers: [AppController],
   providers: [AppService],

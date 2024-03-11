@@ -5,11 +5,12 @@ import { TrackService } from 'src/track/track.service';
 import { Artist } from 'src/artist/interfaces/artist.interface';
 import { Album } from 'src/album/interfaces/album.interface';
 import { Track } from 'src/track/interfaces/track.interface';
+import { StoreService } from 'src/store/store.service';
 
 export interface Favorites {
-  artists: string[]; // favorite artists ids
-  albums: string[]; // favorite albums ids
-  tracks: string[]; // favorite tracks ids
+  artists: Set<string>; // favorite artists ids
+  albums: Set<string>; // favorite albums ids
+  tracks: Set<string>; // favorite tracks ids
 }
 
 export interface FavoritesResponse {
@@ -24,27 +25,26 @@ export class FavoritesService {
     private artistService: ArtistService,
     private albumService: AlbumService,
     private trackService: TrackService,
+    private storeService: StoreService,
   ) {}
-
-  private favorites: Favorites = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
 
   getAll(): FavoritesResponse {
     return {
-      artists: this.favorites.artists.map((id) =>
+      artists: Array.from(this.storeService.favorites.artists).map((id) =>
         this.artistService.getById(id),
       ),
-      albums: this.favorites.albums.map((id) => this.albumService.getById(id)),
-      tracks: this.favorites.tracks.map((id) => this.trackService.getById(id)),
+      albums: Array.from(this.storeService.favorites.albums).map((id) =>
+        this.albumService.getById(id),
+      ),
+      tracks: Array.from(this.storeService.favorites.tracks).map((id) =>
+        this.trackService.getById(id),
+      ),
     };
   }
 
   addFavoriteArtist(id): boolean {
     if (this.artistService.getById(id)) {
-      this.favorites.artists.push(id);
+      this.storeService.favorites.artists.add(id);
       return true;
     }
 
@@ -53,7 +53,7 @@ export class FavoritesService {
 
   addFavoriteAlbum(id): boolean {
     if (this.albumService.getById(id)) {
-      this.favorites.albums.push(id);
+      this.storeService.favorites.albums.add(id);
       return true;
     }
 
@@ -62,14 +62,22 @@ export class FavoritesService {
 
   addFavoriteTrack(id): boolean {
     if (this.trackService.getById(id)) {
-      this.favorites.tracks.push(id);
+      this.storeService.favorites.tracks.add(id);
       return true;
     }
 
     return false;
   }
 
-  // deleteFavoriteArtist(): void {}
-  // deleteFavoriteAlbum(): void {}
-  // deleteFavoriteTrack(): void {}
+  deleteFavoriteArtist(id: string): boolean {
+    return this.storeService.favorites.artists.delete(id);
+  }
+
+  deleteFavoriteAlbum(id: string): boolean {
+    return this.storeService.favorites.albums.delete(id);
+  }
+
+  deleteFavoriteTrack(id: string): boolean {
+    return this.storeService.favorites.tracks.delete(id);
+  }
 }

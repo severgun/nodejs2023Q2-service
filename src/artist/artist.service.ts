@@ -3,17 +3,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './interfaces/artist.interface';
+import { StoreService } from 'src/store/store.service';
 
 @Injectable()
 export class ArtistService {
-  private readonly artists: Map<string, Artist> = new Map();
+  constructor(private storeService: StoreService) {}
 
   getAll(): Artist[] {
-    return Array.from(this.artists.values());
+    return Array.from(this.storeService.artists.values());
   }
 
   getById(id: string): Artist {
-    return this.artists.get(id);
+    return this.storeService.artists.get(id);
   }
 
   createArtist(dto: CreateArtistDto): Artist {
@@ -23,7 +24,7 @@ export class ArtistService {
       ...dto,
     };
 
-    this.artists.set(id, newArtist);
+    this.storeService.artists.set(id, newArtist);
 
     return newArtist;
   }
@@ -38,6 +39,26 @@ export class ArtistService {
   }
 
   deleteArtist(id: string): boolean {
-    return this.artists.delete(id);
+    const artists = this.storeService.artists;
+    if (artists.has(id)) {
+      this.storeService.albums.forEach((album) => {
+        if (album.artistId === id) {
+          album.artistId = null;
+        }
+      });
+
+      this.storeService.tracks.forEach((track) => {
+        if (track.artistId === id) {
+          track.artistId = null;
+        }
+      });
+
+      this.storeService.favorites.artists.delete(id);
+
+      this.storeService.artists.delete(id);
+
+      return true;
+    }
+    return false;
   }
 }

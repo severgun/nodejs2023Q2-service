@@ -3,17 +3,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './interfaces/album.interface';
+import { StoreService } from 'src/store/store.service';
 
 @Injectable()
 export class AlbumService {
-  private readonly albums: Map<string, Album> = new Map();
+  constructor(private storeService: StoreService) {}
 
   getAll(): Album[] {
-    return Array.from(this.albums.values());
+    return Array.from(this.storeService.albums.values());
   }
 
   getById(id: string): Album {
-    return this.albums.get(id);
+    return this.storeService.albums.get(id);
   }
 
   createAlbum(dto: CreateAlbumDto): Album {
@@ -23,7 +24,7 @@ export class AlbumService {
       ...dto,
     };
 
-    this.albums.set(id, newAlbum);
+    this.storeService.albums.set(id, newAlbum);
 
     return newAlbum;
   }
@@ -39,6 +40,20 @@ export class AlbumService {
   }
 
   deleteAlbum(id: string): boolean {
-    return this.albums.delete(id);
+    const albums = this.storeService.albums;
+    if (albums.has(id)) {
+      this.storeService.tracks.forEach((track) => {
+        if (track.albumId === id) {
+          track.albumId = null;
+        }
+      });
+
+      this.storeService.favorites.albums.delete(id);
+
+      this.storeService.albums.delete(id);
+
+      return true;
+    }
+    return false;
   }
 }

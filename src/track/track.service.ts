@@ -3,17 +3,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './interfaces/track.interface';
+import { StoreService } from 'src/store/store.service';
 
 @Injectable()
 export class TrackService {
-  private readonly tracks: Map<string, Track> = new Map();
+  constructor(private storeService: StoreService) {}
 
   getAll(): Track[] {
-    return Array.from(this.tracks.values());
+    return Array.from(this.storeService.tracks.values());
   }
 
   getById(id: string): Track {
-    return this.tracks.get(id);
+    return this.storeService.tracks.get(id);
   }
 
   createTrack(dto: CreateTrackDto): Track {
@@ -23,7 +24,7 @@ export class TrackService {
       ...dto,
     };
 
-    this.tracks.set(id, newTrack);
+    this.storeService.tracks.set(id, newTrack);
 
     return newTrack;
   }
@@ -40,6 +41,15 @@ export class TrackService {
   }
 
   deleteTrack(id: string): boolean {
-    return this.tracks.delete(id);
+    const tracks = this.storeService.tracks;
+    if (tracks.has(id)) {
+      this.storeService.favorites.tracks.delete(id);
+
+      this.storeService.tracks.delete(id);
+
+      return true;
+    }
+
+    return false;
   }
 }
