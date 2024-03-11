@@ -3,30 +3,30 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
   Res,
 } from '@nestjs/common';
-import { User, UserService } from './user.service';
+import { UserNoPassword, UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { validate } from 'uuid';
 import { Response } from 'express';
+import { filterOutPassword } from 'src/utils/filterOutPassword';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  getAll(): User[] {
-    return this.userService.getAll();
+  getAll(): UserNoPassword[] {
+    return this.userService.getAll().map((user) => filterOutPassword(user));
   }
 
   @Get(':id')
-  getById(@Param('id') id: string, @Res() res: Response): User {
+  getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
@@ -40,11 +40,11 @@ export class UserController {
       return;
     }
 
-    return user;
+    res.status(HttpStatus.OK).send(filterOutPassword(user));
   }
 
   @Post()
-  createUser(@Body() dto: CreateUserDto, @Res() res: Response): User {
+  createUser(@Body() dto: CreateUserDto, @Res() res: Response) {
     if (!dto.login || !dto.password) {
       res
         .status(HttpStatus.BAD_REQUEST)
@@ -52,7 +52,9 @@ export class UserController {
       return;
     }
 
-    return this.userService.createUser(dto);
+    const newUser = this.userService.createUser(dto);
+
+    res.status(HttpStatus.CREATED).send(filterOutPassword(newUser));
   }
 
   @Put(':id')
@@ -60,9 +62,16 @@ export class UserController {
     @Body() dto: UpdatePasswordDto,
     @Param('id') id: string,
     @Res() res: Response,
-  ): User {
+  ) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
+      return;
+    }
+
+    if (!dto.oldPassword || !dto.newPassword) {
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .send('Required fields are not provided.');
       return;
     }
 
@@ -77,23 +86,20 @@ export class UserController {
       return;
     }
 
-    return this.userService.updateUser(dto, id);
+    const updatedUser = this.userService.updateUser(dto, id);
+
+    res.status(HttpStatus.OK).send(filterOutPassword(updatedUser));
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   deleteUser(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
       return;
     }
 
-    const user = this.userService.getById(id);
-    if (!user) {
-      res.status(HttpStatus.NOT_FOUND).send('User not found.');
-      return;
-    }
-
-    this.userService.deleteUser(id);
+    this.userService.deleteUser(id)
+      ? res.status(HttpStatus.NO_CONTENT).send()
+      : res.status(HttpStatus.NOT_FOUND).send('User not found.');
   }
 }

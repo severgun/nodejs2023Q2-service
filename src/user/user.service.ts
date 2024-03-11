@@ -3,13 +3,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
-export interface User {
+export interface UserNoPassword {
   id: string; // uuid v4
   login: string;
-  password: string;
   version: number; // integer number, increments on update
   createdAt: number; // timestamp of creation
   updatedAt: number; // timestamp of last update
+}
+
+export interface User extends UserNoPassword {
+  password: string;
 }
 
 @Injectable()
@@ -29,7 +32,7 @@ export class UserService {
     const newUser: User = {
       id,
       ...dto,
-      version: 0,
+      version: 1,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -49,7 +52,7 @@ export class UserService {
     return user;
   }
 
-  deleteUser(id: string) {
-    this.users.delete(id);
+  deleteUser(id: string): boolean {
+    return this.users.delete(id);
   }
 }
