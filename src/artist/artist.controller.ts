@@ -26,7 +26,7 @@ export class ArtistController {
   }
 
   @Get(':id')
-  getById(@Param('id') id: string, @Res() res: Response): Artist {
+  getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
@@ -40,11 +40,11 @@ export class ArtistController {
       return;
     }
 
-    return artist;
+    res.status(HttpStatus.OK).send(artist);
   }
 
   @Post()
-  createArtist(@Body() dto: CreateArtistDto, @Res() res: Response): Artist {
+  createArtist(@Body() dto: CreateArtistDto, @Res() res: Response) {
     if (!dto.name || !dto.grammy) {
       res
         .status(HttpStatus.BAD_REQUEST)
@@ -52,7 +52,9 @@ export class ArtistController {
       return;
     }
 
-    return this.artistService.createArtist(dto);
+    const newArtist = this.artistService.createArtist(dto);
+
+    res.status(HttpStatus.CREATED).send(newArtist);
   }
 
   @Put(':id')
@@ -60,7 +62,7 @@ export class ArtistController {
     @Body() dto: UpdateArtistDto,
     @Param('id') id: string,
     @Res() res: Response,
-  ): Artist {
+  ) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
       return;
@@ -72,7 +74,9 @@ export class ArtistController {
       return;
     }
 
-    return this.artistService.updateArtist(dto, id);
+    const updatedArtist = this.artistService.updateArtist(dto, id);
+
+    res.status(HttpStatus.OK).send(updatedArtist);
   }
 
   @Delete(':id')
@@ -83,12 +87,8 @@ export class ArtistController {
       return;
     }
 
-    const artist = this.artistService.getById(id);
-    if (!artist) {
-      res.status(HttpStatus.NOT_FOUND).send('Artist not found.');
-      return;
-    }
-
-    this.artistService.deleteArtist(id);
+    this.artistService.deleteArtist(id)
+      ? res.status(HttpStatus.NO_CONTENT).send()
+      : res.status(HttpStatus.NOT_FOUND).send('Artist not found.');
   }
 }

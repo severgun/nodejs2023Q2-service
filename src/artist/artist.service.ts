@@ -42,7 +42,7 @@ export class ArtistService {
     return artist;
   }
 
-  deleteArtist(id: string) {
-    this.artists.delete(id);
+  deleteArtist(id: string): boolean {
+    return this.artists.delete(id);
   }
 }
