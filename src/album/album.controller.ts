@@ -54,7 +54,7 @@ export class AlbumController {
     @Body() dto: UpdateAlbumDto,
     @Param('id') id: string,
     @Res() res: Response,
-  ): Album {
+  ) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
       return;
