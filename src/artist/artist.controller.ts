@@ -10,11 +10,12 @@ import {
   Put,
   Res,
 } from '@nestjs/common';
-import { Artist, ArtistService } from './artist.service';
+import { ArtistService } from './artist.service';
 import { validate } from 'uuid';
 import { Response } from 'express';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { Artist } from './interfaces/artist.interface';
 
 @Controller('artist')
 export class ArtistController {

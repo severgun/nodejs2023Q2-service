@@ -2,18 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-
-export interface UserNoPassword {
-  id: string; // uuid v4
-  login: string;
-  version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
-}
-
-export interface User extends UserNoPassword {
-  password: string;
-}
+import { User } from './interfaces/user.interface';
 
 @Injectable()
 export class UserService {

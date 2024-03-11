@@ -2,14 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-
-export interface Track {
-  id: string; // uuid v4
-  name: string;
-  artistId: string | null; // refers to Artist
-  albumId: string | null; // refers to Album
-  duration: number; // integer number
-}
+import { Track } from './interfaces/track.interface';
 
 @Injectable()
 export class TrackService {

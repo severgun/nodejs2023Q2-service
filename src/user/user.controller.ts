@@ -9,12 +9,13 @@ import {
   Put,
   Res,
 } from '@nestjs/common';
-import { UserNoPassword, UserService } from './user.service';
+import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { validate } from 'uuid';
 import { Response } from 'express';
 import { filterOutPassword } from 'src/utils/filterOutPassword';
+import { UserNoPassword } from './interfaces/user-no-password.interface';
 
 @Controller('user')
 export class UserController {

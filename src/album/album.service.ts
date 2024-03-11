@@ -2,13 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-
-export interface Album {
-  id: string; // uuid v4
-  name: string;
-  year: number;
-  artistId: string | null; // refers to Artist
-}
+import { Album } from './interfaces/album.interface';
 
 @Injectable()
 export class AlbumService {

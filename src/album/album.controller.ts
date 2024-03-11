@@ -11,9 +11,10 @@ import {
 } from '@nestjs/common';
 import { validate } from 'uuid';
 import { Response } from 'express';
-import { Album, AlbumService } from './album.service';
+import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Album } from './interfaces/album.interface';
 
 @Controller('album')
 export class AlbumController {

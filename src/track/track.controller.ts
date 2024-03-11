@@ -11,9 +11,10 @@ import {
 } from '@nestjs/common';
 import { validate } from 'uuid';
 import { Response } from 'express';
-import { Track, TrackService } from './track.service';
+import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { Track } from './interfaces/track.interface';
 
 @Controller('track')
 export class TrackController {
