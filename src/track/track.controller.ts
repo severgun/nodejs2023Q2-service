@@ -14,26 +14,25 @@ import { Response } from 'express';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Track } from './interfaces/track.interface';
 
 @Controller('track')
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Get()
-  getAll(): Track[] {
-    return this.trackService.getAll();
+  async getAll() {
+    return await this.trackService.getAll();
   }
 
   @Get(':id')
-  getById(@Param('id') id: string, @Res() res: Response): void {
+  async getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
       return;
     }
 
-    const track = this.trackService.getById(id);
+    const track = await this.trackService.getById(id);
 
     if (!track) {
       res.status(HttpStatus.NOT_FOUND).send('Track not found.');
@@ -44,48 +43,50 @@ export class TrackController {
   }
 
   @Post()
-  createTrack(@Body() dto: CreateTrackDto, @Res() res: Response): void {
-    const newTrack = this.trackService.createTrack(dto);
+  async createTrack(@Body() dto: CreateTrackDto, @Res() res: Response) {
+    const newTrack = await this.trackService.createTrack(dto);
 
     res.status(HttpStatus.CREATED).send(newTrack);
   }
 
   @Put(':id')
-  updateTrack(
+  async updateTrack(
     @Body() dto: UpdateTrackDto,
     @Param('id') id: string,
     @Res() res: Response,
-  ): void {
+  ) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
       return;
     }
 
-    const track = this.trackService.getById(id);
+    const track = await this.trackService.getById(id);
     if (!track) {
       res.status(HttpStatus.NOT_FOUND).send('Track not found.');
       return;
     }
 
-    const updatedTrack = this.trackService.updateTrack(dto, id);
+    const updatedTrack = await this.trackService.updateTrack(dto, id);
 
     res.status(HttpStatus.OK).send(updatedTrack);
   }
 
   @Delete(':id')
-  deleteTrack(@Param('id') id: string, @Res() res: Response) {
+  async deleteTrack(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
       return;
     }
 
-    const track = this.trackService.getById(id);
+    const track = await this.trackService.getById(id);
     if (!track) {
       res.status(HttpStatus.NOT_FOUND).send('Track not found.');
       return;
     }
 
-    this.trackService.deleteTrack(id)
+    const result = await this.trackService.deleteTrack(id);
+
+    result
       ? res.status(HttpStatus.NO_CONTENT).send()
       : res.status(HttpStatus.NOT_FOUND).send('Track not found.');
   }

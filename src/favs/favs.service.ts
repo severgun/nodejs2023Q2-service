@@ -34,12 +34,7 @@ export class FavoritesService {
     return {
       artists: await this.prisma.artist.findMany(),
       albums: await this.prisma.album.findMany(),
-      // albums: Array.from(this.storeService.favorites.albums).map((id) =>
-      //   this.albumService.getById(id),
-      // ),
-      tracks: Array.from(this.storeService.favorites.tracks).map((id) =>
-        this.trackService.getById(id),
-      ),
+      tracks: await this.prisma.track.findMany(),
     };
   }
 

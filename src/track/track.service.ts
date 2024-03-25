@@ -3,53 +3,56 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './interfaces/track.interface';
-import { StoreService } from 'src/store/store.service';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class TrackService {
-  constructor(private storeService: StoreService) {}
+  constructor(private prisma: PrismaService) {}
 
-  getAll(): Track[] {
-    return Array.from(this.storeService.tracks.values());
+  async getAll(): Promise<Track[]> {
+    return await this.prisma.track.findMany();
   }
 
-  getById(id: string): Track {
-    return this.storeService.tracks.get(id);
+  async getById(id: string): Promise<Track> {
+    return this.prisma.track.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
-  createTrack(dto: CreateTrackDto): Track {
+  async createTrack(dto: CreateTrackDto): Promise<Track> {
     const id = uuidv4();
     const newTrack: Track = {
       id,
       ...dto,
     };
 
-    this.storeService.tracks.set(id, newTrack);
-
-    return newTrack;
+    return this.prisma.track.create({
+      data: newTrack,
+    });
   }
 
-  updateTrack(dto: UpdateTrackDto, id: string): Track {
-    const track = this.getById(id);
-
-    track.name = dto.name;
-    track.artistId = dto.artistId;
-    track.albumId = dto.albumId;
-    track.duration = dto.duration;
-
-    return track;
+  async updateTrack(dto: UpdateTrackDto, id: string): Promise<Track> {
+    return this.prisma.track.update({
+      where: {
+        id,
+      },
+      data: dto,
+    });
   }
 
-  deleteTrack(id: string): boolean {
-    const tracks = this.storeService.tracks;
-    if (tracks.has(id)) {
-      this.storeService.favorites.tracks.delete(id);
-
-      this.storeService.tracks.delete(id);
+  async deleteTrack(id: string): Promise<boolean> {
+    try {
+      await this.prisma.track.delete({
+        where: {
+          id,
+        },
+      });
 
       return true;
+    } catch (error) {
+      return false;
     }
-
-    return false;
   }
 }
