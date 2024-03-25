@@ -3,45 +3,61 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './interfaces/user.interface';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UserService {
-  private readonly users: Map<string, User> = new Map();
+  constructor(private prisma: PrismaService) {}
 
-  getAll(): User[] {
-    return Array.from(this.users.values());
+  async getAll(): Promise<User[]> {
+    return this.prisma.user.findMany();
   }
 
-  getById(id: string): User {
-    return this.users.get(id);
+  async getById(id: string): Promise<User> {
+    return this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
-  createUser(dto: CreateUserDto): User {
+  async createUser(dto: CreateUserDto): Promise<User> {
     const id = uuidv4();
-    const newUser: User = {
+    const newUser = {
       id,
       ...dto,
       version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
     };
 
-    this.users.set(id, newUser);
-
-    return newUser;
+    return this.prisma.user.create({
+      data: newUser,
+    });
   }
 
-  updateUser(dto: UpdatePasswordDto, id: string): User {
-    const user = this.getById(id);
-
-    user.password = dto.newPassword;
-    user.updatedAt = Date.now();
-    user.version++;
-
-    return user;
+  async updateUser(dto: UpdatePasswordDto, id: string): Promise<User> {
+    return this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: dto.newPassword,
+        version: { increment: 1 },
+        updatedAt: new Date(),
+      },
+    });
   }
 
-  deleteUser(id: string): boolean {
-    return this.users.delete(id);
+  async deleteUser(id: string): Promise<boolean> {
+    try {
+      await this.prisma.user.delete({
+        where: {
+          id,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }

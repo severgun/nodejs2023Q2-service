@@ -15,44 +15,55 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { validate } from 'uuid';
 import { Response } from 'express';
 import { filterOutPassword } from 'src/utils/filterOutPassword';
-import { UserNoPassword } from './interfaces/user-no-password.interface';
+import { dateToNumber } from 'src/utils/dateToNumber';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  getAll(): UserNoPassword[] {
-    return this.userService.getAll().map((user) => filterOutPassword(user));
+  async getAll(@Res() res: Response) {
+    const users = await this.userService.getAll();
+
+    const result = users
+      .map((user) => filterOutPassword(user))
+      .map((user) => dateToNumber(user));
+
+    res.status(HttpStatus.OK).send(result);
+    return;
   }
 
   @Get(':id')
-  getById(@Param('id') id: string, @Res() res: Response) {
+  async getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
       return;
     }
 
-    const user = this.userService.getById(id);
+    const user = await this.userService.getById(id);
 
     if (!user) {
       res.status(HttpStatus.NOT_FOUND).send('User not found.');
       return;
     }
 
-    res.status(HttpStatus.OK).send(filterOutPassword(user));
+    const result = filterOutPassword(user);
+
+    res.status(HttpStatus.OK).send(dateToNumber(result));
   }
 
   @Post()
-  createUser(@Body() dto: CreateUserDto, @Res() res: Response) {
-    const newUser = this.userService.createUser(dto);
+  async createUser(@Body() dto: CreateUserDto, @Res() res: Response) {
+    const newUser = await this.userService.createUser(dto);
 
-    res.status(HttpStatus.CREATED).send(filterOutPassword(newUser));
+    const result = filterOutPassword(newUser);
+
+    res.status(HttpStatus.CREATED).send(dateToNumber(result));
   }
 
   @Put(':id')
-  updateUser(
+  async updateUser(
     @Body() dto: UpdatePasswordDto,
     @Param('id') id: string,
     @Res() res: Response,
@@ -62,7 +73,7 @@ export class UserController {
       return;
     }
 
-    const user = this.userService.getById(id);
+    const user = await this.userService.getById(id);
     if (!user) {
       res.status(HttpStatus.NOT_FOUND).send('User not found.');
       return;
@@ -73,19 +84,23 @@ export class UserController {
       return;
     }
 
-    const updatedUser = this.userService.updateUser(dto, id);
+    const updatedUser = await this.userService.updateUser(dto, id);
 
-    res.status(HttpStatus.OK).send(filterOutPassword(updatedUser));
+    const result = filterOutPassword(updatedUser);
+
+    res.status(HttpStatus.OK).send(dateToNumber(result));
   }
 
   @Delete(':id')
-  deleteUser(@Param('id') id: string, @Res() res: Response) {
+  async deleteUser(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
       return;
     }
 
-    this.userService.deleteUser(id)
+    const result = await this.userService.deleteUser(id);
+
+    result
       ? res.status(HttpStatus.NO_CONTENT).send()
       : res.status(HttpStatus.NOT_FOUND).send('User not found.');
   }
