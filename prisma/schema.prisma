@@ -25,49 +25,43 @@ model User {
 }
 
 model Artist {
-  id          String     @id @default(uuid())
-  name        String
-  grammy      Boolean    @default(false)
-  albums      Album[]
-  tracks      Track[]
-  favorites   Favorites? @relation(fields: [favoritesId], references: [id])
-  favoritesId String?
+  id     String  @id @default(uuid())
+  name   String
+  grammy Boolean @default(false)
+  albums Album[]
+  tracks Track[]
 
   @@map("artists")
 }
 
 model Album {
-  id          String     @id @default(uuid())
-  name        String
-  year        Int
-  artist      Artist?    @relation(fields: [artistId], references: [id], onDelete: SetNull)
-  artistId    String?
-  tracks      Track[]
-  favorites   Favorites? @relation(fields: [favoritesId], references: [id])
-  favoritesId String?
+  id       String  @id @default(uuid())
+  name     String
+  year     Int
+  artist   Artist? @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  artistId String?
+  tracks   Track[]
 
   @@map("albums")
 }
 
 model Track {
-  id          String     @id @default(uuid())
-  name        String
-  artist      Artist?    @relation(fields: [artistId], references: [id], onDelete: SetNull)
-  artistId    String?
-  album       Album?     @relation(fields: [albumId], references: [id], onDelete: SetNull)
-  albumId     String?
-  duration    Int
-  favorites   Favorites? @relation(fields: [favoritesId], references: [id])
-  favoritesId String?
+  id       String  @id @default(uuid())
+  name     String
+  artist   Artist? @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  artistId String?
+  album    Album?  @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  albumId  String?
+  duration Int
 
   @@map("tracks")
 }
 
 model Favorites {
-  id     String   @id @default(uuid())
-  artist Artist[]
-  albums Album[]
-  tracks Track[]
+  id      String   @id @default(uuid())
+  artists String[]
+  albums  String[]
+  tracks  String[]
 
   @@map("favorites")
 }
