@@ -3,57 +3,56 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './interfaces/album.interface';
-import { StoreService } from 'src/store/store.service';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AlbumService {
-  constructor(private storeService: StoreService) {}
+  constructor(private prisma: PrismaService) {}
 
-  getAll(): Album[] {
-    return Array.from(this.storeService.albums.values());
+  async getAll(): Promise<Album[]> {
+    return this.prisma.album.findMany();
   }
 
-  getById(id: string): Album {
-    return this.storeService.albums.get(id);
+  async getById(id: string): Promise<Album> {
+    return this.prisma.album.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
-  createAlbum(dto: CreateAlbumDto): Album {
+  async createAlbum(dto: CreateAlbumDto): Promise<Album> {
     const id = uuidv4();
     const newAlbum: Album = {
       id,
       ...dto,
     };
 
-    this.storeService.albums.set(id, newAlbum);
-
-    return newAlbum;
+    return this.prisma.album.create({
+      data: newAlbum,
+    });
   }
 
-  updateAlbum(dto: UpdateAlbumDto, id: string): Album {
-    const album = this.getById(id);
-
-    album.name = dto.name;
-    album.year = dto.year;
-    album.artistId = dto.artistId;
-
-    return album;
+  async updateAlbum(dto: UpdateAlbumDto, id: string): Promise<Album> {
+    return this.prisma.album.update({
+      where: {
+        id,
+      },
+      data: dto,
+    });
   }
 
-  deleteAlbum(id: string): boolean {
-    const albums = this.storeService.albums;
-    if (albums.has(id)) {
-      this.storeService.tracks.forEach((track) => {
-        if (track.albumId === id) {
-          track.albumId = null;
-        }
+  async deleteAlbum(id: string): Promise<boolean> {
+    try {
+      await this.prisma.album.delete({
+        where: {
+          id,
+        },
       });
 
-      this.storeService.favorites.albums.delete(id);
-
-      this.storeService.albums.delete(id);
-
       return true;
+    } catch (error) {
+      return false;
     }
-    return false;
   }
 }

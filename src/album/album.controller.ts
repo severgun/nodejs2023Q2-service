@@ -14,26 +14,27 @@ import { Response } from 'express';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Album } from './interfaces/album.interface';
 
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Get()
-  getAll(): Album[] {
-    return this.albumService.getAll();
+  async getAll(@Res() res: Response) {
+    const result = await this.albumService.getAll();
+
+    res.status(HttpStatus.OK).send(result);
   }
 
   @Get(':id')
-  getById(@Param('id') id: string, @Res() res: Response): Album {
+  async getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
       return;
     }
 
-    const album = this.albumService.getById(id);
+    const album = await this.albumService.getById(id);
 
     if (!album) {
       res.status(HttpStatus.NOT_FOUND).send('Album not found.');
@@ -44,14 +45,14 @@ export class AlbumController {
   }
 
   @Post()
-  createAlbum(@Body() dto: CreateAlbumDto, @Res() res: Response) {
-    const newAlbum = this.albumService.createAlbum(dto);
+  async createAlbum(@Body() dto: CreateAlbumDto, @Res() res: Response) {
+    const newAlbum = await this.albumService.createAlbum(dto);
 
     res.status(HttpStatus.CREATED).send(newAlbum);
   }
 
   @Put(':id')
-  updateAlbum(
+  async updateAlbum(
     @Body() dto: UpdateAlbumDto,
     @Param('id') id: string,
     @Res() res: Response,
@@ -61,31 +62,27 @@ export class AlbumController {
       return;
     }
 
-    const album = this.albumService.getById(id);
+    const album = await this.albumService.getById(id);
     if (!album) {
       res.status(HttpStatus.NOT_FOUND).send('Album not found.');
       return;
     }
 
-    const updatedAlbum = this.albumService.updateAlbum(dto, id);
+    const updatedAlbum = await this.albumService.updateAlbum(dto, id);
 
     res.status(HttpStatus.OK).send(updatedAlbum);
   }
 
   @Delete(':id')
-  deleteAlbum(@Param('id') id: string, @Res() res: Response) {
+  async deleteAlbum(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
       return;
     }
 
-    const album = this.albumService.getById(id);
-    if (!album) {
-      res.status(HttpStatus.NOT_FOUND).send('Album not found.');
-      return;
-    }
+    const result = await this.albumService.deleteAlbum(id);
 
-    this.albumService.deleteAlbum(id)
+    result
       ? res.status(HttpStatus.NO_CONTENT).send()
       : res.status(HttpStatus.NOT_FOUND).send('Album not found.');
   }

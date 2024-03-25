@@ -6,6 +6,7 @@ import { Artist } from 'src/artist/interfaces/artist.interface';
 import { Album } from 'src/album/interfaces/album.interface';
 import { Track } from 'src/track/interfaces/track.interface';
 import { StoreService } from 'src/store/store.service';
+import { PrismaService } from 'src/prisma.service';
 
 export interface Favorites {
   artists: Set<string>; // favorite artists ids
@@ -26,16 +27,18 @@ export class FavoritesService {
     private albumService: AlbumService,
     private trackService: TrackService,
     private storeService: StoreService,
+    private prisma: PrismaService,
   ) {}
 
-  getAll(): FavoritesResponse {
+  async getAll(): Promise<FavoritesResponse> {
     return {
       artists: Array.from(this.storeService.favorites.artists).map((id) =>
         this.artistService.getById(id),
       ),
-      albums: Array.from(this.storeService.favorites.albums).map((id) =>
-        this.albumService.getById(id),
-      ),
+      albums: await this.prisma.album.findMany(),
+      // albums: Array.from(this.storeService.favorites.albums).map((id) =>
+      //   this.albumService.getById(id),
+      // ),
       tracks: Array.from(this.storeService.favorites.tracks).map((id) =>
         this.trackService.getById(id),
       ),

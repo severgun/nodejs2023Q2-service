@@ -16,8 +16,10 @@ export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
   @Get()
-  getAll(): FavoritesResponse {
-    return this.favoritesService.getAll();
+  async getAll(@Res() res: Response) {
+    const result = await this.favoritesService.getAll();
+
+    res.status(HttpStatus.OK).send(result);
   }
 
   @Post('artist/:id')
