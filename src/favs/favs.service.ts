@@ -32,9 +32,7 @@ export class FavoritesService {
 
   async getAll(): Promise<FavoritesResponse> {
     return {
-      artists: Array.from(this.storeService.favorites.artists).map((id) =>
-        this.artistService.getById(id),
-      ),
+      artists: await this.prisma.artist.findMany(),
       albums: await this.prisma.album.findMany(),
       // albums: Array.from(this.storeService.favorites.albums).map((id) =>
       //   this.albumService.getById(id),

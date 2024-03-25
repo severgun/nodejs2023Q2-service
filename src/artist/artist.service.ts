@@ -3,62 +3,56 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './interfaces/artist.interface';
-import { StoreService } from 'src/store/store.service';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class ArtistService {
-  constructor(private storeService: StoreService) {}
+  constructor(private prisma: PrismaService) {}
 
-  getAll(): Artist[] {
-    return Array.from(this.storeService.artists.values());
+  async getAll(): Promise<Artist[]> {
+    return this.prisma.artist.findMany();
   }
 
-  getById(id: string): Artist {
-    return this.storeService.artists.get(id);
+  async getById(id: string): Promise<Artist> {
+    return this.prisma.artist.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
-  createArtist(dto: CreateArtistDto): Artist {
+  async createArtist(dto: CreateArtistDto): Promise<Artist> {
     const id = uuidv4();
     const newArtist: Artist = {
       id,
       ...dto,
     };
 
-    this.storeService.artists.set(id, newArtist);
-
-    return newArtist;
+    return this.prisma.artist.create({
+      data: newArtist,
+    });
   }
 
-  updateArtist(dto: UpdateArtistDto, id: string): Artist {
-    const artist = this.getById(id);
-
-    artist.name = dto.name;
-    artist.grammy = dto.grammy;
-
-    return artist;
+  async updateArtist(dto: UpdateArtistDto, id: string): Promise<Artist> {
+    return this.prisma.artist.update({
+      where: {
+        id,
+      },
+      data: dto,
+    });
   }
 
-  deleteArtist(id: string): boolean {
-    const artists = this.storeService.artists;
-    if (artists.has(id)) {
-      this.storeService.albums.forEach((album) => {
-        if (album.artistId === id) {
-          album.artistId = null;
-        }
+  async deleteArtist(id: string): Promise<boolean> {
+    try {
+      await this.prisma.artist.delete({
+        where: {
+          id,
+        },
       });
-
-      this.storeService.tracks.forEach((track) => {
-        if (track.artistId === id) {
-          track.artistId = null;
-        }
-      });
-
-      this.storeService.favorites.artists.delete(id);
-
-      this.storeService.artists.delete(id);
 
       return true;
+    } catch (error) {
+      return false;
     }
-    return false;
   }
 }
