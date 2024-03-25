@@ -7,6 +7,8 @@ COPY prisma ./prisma/
 
 RUN npm ci && npm cache clean --force
 
+RUN npx prisma generate
+
 COPY . .
 
 RUN npm run build
