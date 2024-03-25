@@ -1,24 +1,39 @@
-version: '3.5'
-
 services:
   postgres:
     container_name: postgres
-    image: postgres:alpine
+    build: 
+      dockerfile: Dockerfile.db
+      context: .
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       PGDATA: /data/postgres
     volumes:
-       - postgres:/data/postgres
+      - postgres:/data/postgres
     ports:
-      - "5432:5432"
+      - ${POSTGRES_PORT}:5432
     networks:
+      - backend
+    restart: unless-stopped
+
+  home-library-app:
+    container_name: home-library-app
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - .:/app
+    ports:
+      - ${PORT}:${PORT}
+    networks:
+      - backend
+    depends_on:
       - postgres
     restart: unless-stopped
 
 networks:
-  postgres:
+  backend:
     driver: bridge
 
 volumes:
-    postgres:
+  postgres:

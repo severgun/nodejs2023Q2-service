@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env.example
+.eslint*
+.prettier*
+.vscode/
+node_modules
+dist
+docker-compose.yml
+Dockerfile*
+.dockerignore
+jest.config.json
+*.md
+test/
+coverage/
