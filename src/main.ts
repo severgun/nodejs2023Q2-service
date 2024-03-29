@@ -11,10 +11,19 @@ async function bootstrap() {
     bufferLogs: true,
   });
 
-  app.useLogger(app.get(LoggingService));
+  const logger = app.get(LoggingService);
+  app.useLogger(logger);
+
+  process.on('uncaughtException', (error) => {
+    const { name, message, stack } = error;
+    logger.error(`${name}: ${message}`, stack, 'NodeJS UncaughtException');
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    logger.error(reason, '', 'NodeJS UnhandledRejection');
+  });
 
   const httpAdapter = app.get(HttpAdapterHost);
-  const logger = app.get(LoggingService);
   app.useGlobalFilters(new CustomExceptionFilter(httpAdapter, logger));
 
   app.useGlobalPipes(new ValidationPipe());
