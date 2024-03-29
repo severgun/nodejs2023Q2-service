@@ -1,9 +1,10 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { LoggingService } from './logging/logging.service';
+import { CustomExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -11,6 +12,10 @@ async function bootstrap() {
   });
 
   app.useLogger(app.get(LoggingService));
+
+  const httpAdapter = app.get(HttpAdapterHost);
+  const logger = app.get(LoggingService);
+  app.useGlobalFilters(new CustomExceptionFilter(httpAdapter, logger));
 
   app.useGlobalPipes(new ValidationPipe());
 
