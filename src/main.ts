@@ -4,7 +4,7 @@ import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { LoggingService } from './logging/logging.service';
-import { CustomExceptionFilter } from './filters/http-exception.filter';
+import { CustomExceptionFilter } from './filters/custom-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
