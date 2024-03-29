@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -28,15 +30,13 @@ export class TrackController {
   async getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
-      return;
+      throw new BadRequestException('Not valid track ID.');
     }
 
     const track = await this.trackService.getById(id);
 
     if (!track) {
-      res.status(HttpStatus.NOT_FOUND).send('Track not found.');
-      return;
+      throw new NotFoundException('Track not found.');
     }
 
     res.status(HttpStatus.OK).send(track);
@@ -56,14 +56,12 @@ export class TrackController {
     @Res() res: Response,
   ) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
-      return;
+      throw new BadRequestException('Not valid track ID.');
     }
 
     const track = await this.trackService.getById(id);
     if (!track) {
-      res.status(HttpStatus.NOT_FOUND).send('Track not found.');
-      return;
+      throw new NotFoundException('Track not found.');
     }
 
     const updatedTrack = await this.trackService.updateTrack(dto, id);
@@ -74,20 +72,20 @@ export class TrackController {
   @Delete(':id')
   async deleteTrack(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
-      return;
+      throw new BadRequestException('Not valid track ID.');
     }
 
     const track = await this.trackService.getById(id);
     if (!track) {
-      res.status(HttpStatus.NOT_FOUND).send('Track not found.');
-      return;
+      throw new NotFoundException('Track not found.');
     }
 
     const result = await this.trackService.deleteTrack(id);
 
-    result
-      ? res.status(HttpStatus.NO_CONTENT).send()
-      : res.status(HttpStatus.NOT_FOUND).send('Track not found.');
+    if (!result) {
+      throw new NotFoundException('Track not found.');
+    }
+
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 }

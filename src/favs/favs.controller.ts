@@ -1,11 +1,14 @@
 import {
+  BadRequestException,
   Controller,
   Delete,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Res,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { validate } from 'uuid';
 import { FavoritesService } from './favs.service';
@@ -25,80 +28,90 @@ export class FavoritesController {
   @Post('artist/:id')
   async addFavoriteArtist(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
-      return;
+      throw new BadRequestException('Not valid artist ID.');
     }
 
     const result = await this.favoritesService.addFavoriteArtist(id);
 
-    result
-      ? res.status(HttpStatus.CREATED).send()
-      : res.status(HttpStatus.UNPROCESSABLE_ENTITY).send();
+    if (!result) {
+      throw new UnprocessableEntityException();
+    }
+
+    res.status(HttpStatus.CREATED).send();
   }
 
   @Post('album/:id')
   async addFavoriteAlbum(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
-      return;
+      throw new BadRequestException('Not valid album ID.');
     }
 
     const result = await this.favoritesService.addFavoriteAlbum(id);
-    result
-      ? res.status(HttpStatus.CREATED).send()
-      : res.status(HttpStatus.UNPROCESSABLE_ENTITY).send();
+
+    if (!result) {
+      throw new UnprocessableEntityException();
+    }
+
+    res.status(HttpStatus.CREATED).send();
   }
 
   @Post('track/:id')
   async addFavoriteTrack(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
-      return;
+      throw new BadRequestException('Not valid track ID.');
     }
 
     const result = await this.favoritesService.addFavoriteTrack(id);
-    result
-      ? res.status(HttpStatus.CREATED).send()
-      : res.status(HttpStatus.UNPROCESSABLE_ENTITY).send();
+
+    if (!result) {
+      throw new UnprocessableEntityException();
+    }
+
+    res.status(HttpStatus.CREATED).send();
   }
 
   @Delete('artist/:id')
   async deleteFavoriteArtist(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
-      return;
+      throw new BadRequestException('Not valid artist ID.');
     }
 
     const result = await this.favoritesService.deleteFavoriteArtist(id);
-    result
-      ? res.status(HttpStatus.NO_CONTENT).send()
-      : res.status(HttpStatus.NOT_FOUND).send();
+
+    if (!result) {
+      throw new NotFoundException();
+    }
+
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 
   @Delete('album/:id')
   async deleteFavoriteAlbum(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
-      return;
+      throw new BadRequestException('Not valid album ID.');
     }
 
     const result = await this.favoritesService.deleteFavoriteAlbum(id);
 
-    result
-      ? res.status(HttpStatus.NO_CONTENT).send()
-      : res.status(HttpStatus.NOT_FOUND).send();
+    if (!result) {
+      throw new NotFoundException();
+    }
+
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 
   @Delete('track/:id')
   async deleteFavoriteTrack(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid track ID.');
-      return;
+      throw new BadRequestException('Not valid track ID.');
     }
 
     const result = await this.favoritesService.deleteFavoriteTrack(id);
-    result
-      ? res.status(HttpStatus.NO_CONTENT).send()
-      : res.status(HttpStatus.NOT_FOUND).send();
+
+    if (!result) {
+      throw new NotFoundException();
+    }
+
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 }

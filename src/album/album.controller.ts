@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -30,15 +32,13 @@ export class AlbumController {
   async getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
-      return;
+      throw new BadRequestException('Not valid album ID.');
     }
 
     const album = await this.albumService.getById(id);
 
     if (!album) {
-      res.status(HttpStatus.NOT_FOUND).send('Album not found.');
-      return;
+      throw new NotFoundException('Album not found.');
     }
 
     res.status(HttpStatus.OK).send(album);
@@ -58,14 +58,12 @@ export class AlbumController {
     @Res() res: Response,
   ) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
-      return;
+      throw new BadRequestException('Not valid album ID.');
     }
 
     const album = await this.albumService.getById(id);
     if (!album) {
-      res.status(HttpStatus.NOT_FOUND).send('Album not found.');
-      return;
+      throw new NotFoundException('Album not found.');
     }
 
     const updatedAlbum = await this.albumService.updateAlbum(dto, id);
@@ -76,14 +74,15 @@ export class AlbumController {
   @Delete(':id')
   async deleteAlbum(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid album ID.');
-      return;
+      throw new BadRequestException('Not valid album ID.');
     }
 
     const result = await this.albumService.deleteAlbum(id);
 
-    result
-      ? res.status(HttpStatus.NO_CONTENT).send()
-      : res.status(HttpStatus.NOT_FOUND).send('Album not found.');
+    if (!result) {
+      throw new NotFoundException('Album not found.');
+    }
+
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 }

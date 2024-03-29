@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -29,15 +31,13 @@ export class ArtistController {
   async getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
-      return;
+      throw new BadRequestException('Not valid artist ID.');
     }
 
     const artist = await this.artistService.getById(id);
 
     if (!artist) {
-      res.status(HttpStatus.NOT_FOUND).send('Artist not found.');
-      return;
+      throw new NotFoundException('Artist not found.');
     }
 
     res.status(HttpStatus.OK).send(artist);
@@ -57,14 +57,12 @@ export class ArtistController {
     @Res() res: Response,
   ) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
-      return;
+      throw new BadRequestException('Not valid artist ID.');
     }
 
     const artist = await this.artistService.getById(id);
     if (!artist) {
-      res.status(HttpStatus.NOT_FOUND).send('Artist not found.');
-      return;
+      throw new NotFoundException('Artist not found.');
     }
 
     const updatedArtist = await this.artistService.updateArtist(dto, id);
@@ -76,14 +74,15 @@ export class ArtistController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteArtist(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid artist ID.');
-      return;
+      throw new BadRequestException('Not valid artist ID.');
     }
 
     const result = await this.artistService.deleteArtist(id);
 
-    result
-      ? res.status(HttpStatus.NO_CONTENT).send()
-      : res.status(HttpStatus.NOT_FOUND).send('Artist not found.');
+    if (!result) {
+      throw new NotFoundException('Artist not found.');
+    }
+
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 }

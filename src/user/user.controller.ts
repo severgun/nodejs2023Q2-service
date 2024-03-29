@@ -1,9 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -30,22 +33,19 @@ export class UserController {
       .map((user) => dateToNumber(user));
 
     res.status(HttpStatus.OK).send(result);
-    return;
   }
 
   @Get(':id')
   async getById(@Param('id') id: string, @Res() res: Response) {
     // TODO: Refactor repeated checks
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
-      return;
+      throw new BadRequestException('Not valid user ID.');
     }
 
     const user = await this.userService.getById(id);
 
     if (!user) {
-      res.status(HttpStatus.NOT_FOUND).send('User not found.');
-      return;
+      throw new NotFoundException('User not found.');
     }
 
     const result = filterOutPassword(user);
@@ -69,19 +69,16 @@ export class UserController {
     @Res() res: Response,
   ) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
-      return;
+      throw new BadRequestException('Not valid user ID.');
     }
 
     const user = await this.userService.getById(id);
     if (!user) {
-      res.status(HttpStatus.NOT_FOUND).send('User not found.');
-      return;
+      throw new NotFoundException('User not found.');
     }
 
     if (dto.oldPassword !== user.password) {
-      res.status(HttpStatus.FORBIDDEN).send('Wrong password.');
-      return;
+      throw new ForbiddenException('Wrong password.');
     }
 
     const updatedUser = await this.userService.updateUser(dto, id);
@@ -94,14 +91,15 @@ export class UserController {
   @Delete(':id')
   async deleteUser(@Param('id') id: string, @Res() res: Response) {
     if (!validate(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send('Not valid user ID.');
-      return;
+      throw new BadRequestException('Not valid user ID.');
     }
 
     const result = await this.userService.deleteUser(id);
 
-    result
-      ? res.status(HttpStatus.NO_CONTENT).send()
-      : res.status(HttpStatus.NOT_FOUND).send('User not found.');
+    if (!result) {
+      throw new NotFoundException('User not found.');
+    }
+
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 }
