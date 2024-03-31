@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
-- docker-compose [Download from Github](https://github.com/docker/compose/releases/tag/v2.26.0).
+- [docker](https://www.docker.com/)
 
 ## Downloading
 
@@ -20,7 +20,7 @@ npm install
 ## Running application
 
 ```
-sudo docker-compose up
+sudo docker compose up
 ```
 
 After starting the app on port (4000 as default) you can open
