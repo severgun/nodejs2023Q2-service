@@ -4,15 +4,11 @@ import { AuthService } from './auth.service';
 import { PrismaService } from 'src/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Module({
-  imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_ACCESS_TTL || '15min' },
-    }),
-  ],
+  imports: [JwtModule.register({})],
   controllers: [AuthController],
-  providers: [AuthService, UserService, PrismaService],
+  providers: [AuthService, UserService, PrismaService, LoggingService],
 })
 export class AuthModule {}
