@@ -11,25 +11,28 @@ import {
   Post,
   Put,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { validate } from 'uuid';
 import { Response } from 'express';
-import { filterOutPassword } from 'src/utils/filterOutPassword';
+import { filterOutUserData } from 'src/utils/filterOutUserData';
 import { dateToNumber } from 'src/utils/dateToNumber';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async getAll(@Res() res: Response) {
     const users = await this.userService.getAll();
 
     const result = users
-      .map((user) => filterOutPassword(user))
+      .map((user) => filterOutUserData(user))
       .map((user) => dateToNumber(user));
 
     res.status(HttpStatus.OK).send(result);
@@ -48,7 +51,7 @@ export class UserController {
       throw new NotFoundException('User not found.');
     }
 
-    const result = filterOutPassword(user);
+    const result = filterOutUserData(user);
 
     res.status(HttpStatus.OK).send(dateToNumber(result));
   }
@@ -57,7 +60,7 @@ export class UserController {
   async createUser(@Body() dto: CreateUserDto, @Res() res: Response) {
     const newUser = await this.userService.createUser(dto);
 
-    const result = filterOutPassword(newUser);
+    const result = filterOutUserData(newUser);
 
     res.status(HttpStatus.CREATED).send(dateToNumber(result));
   }
@@ -83,7 +86,7 @@ export class UserController {
 
     const updatedUser = await this.userService.updateUser(dto, id);
 
-    const result = filterOutPassword(updatedUser);
+    const result = filterOutUserData(updatedUser);
 
     res.status(HttpStatus.OK).send(dateToNumber(result));
   }

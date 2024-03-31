@@ -9,6 +9,8 @@ import { FavoritesModule } from './favs/favs.module';
 import { LoggingModule } from './logging/logging.module';
 import { LoggingMiddleware } from './logging/logging.middleware';
 import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard } from './common/guards/access-token.guard';
 
 @Module({
   imports: [
@@ -21,7 +23,13 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

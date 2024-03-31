@@ -6,7 +6,6 @@ import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { Tokens } from './types/tokens.type';
 import { JwtService } from '@nestjs/jwt';
-import { LoggingService } from 'src/logging/logging.service';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +13,6 @@ export class AuthService {
     private prisma: PrismaService,
     private userService: UserService,
     private jwtService: JwtService,
-    private logger: LoggingService,
   ) {}
 
   async signup(dto: SignupDto): Promise<Tokens> {
@@ -53,8 +51,29 @@ export class AuthService {
     return tokens;
   }
 
-  async refreshToken(dto: RefreshTokenDto): Promise<boolean> {
-    return false;
+  async refreshToken(dto: RefreshTokenDto): Promise<Tokens> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: dto.userId,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException();
+    }
+
+    const refreshTokenMatches = await bcrypt.compare(
+      dto.refreshToken,
+      user.refreshToken,
+    );
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException();
+    }
+
+    const tokens = await this.getTokens(user.id, user.login);
+    await this.updateRefreshToken(user.id, tokens.refresh_token);
+
+    return tokens;
   }
 
   async hashData(data: string): Promise<string> {
