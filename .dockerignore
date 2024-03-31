@@ -1,9 +1,3 @@
-.git
-.gitignore
-.env.example
-.eslint*
-.prettier*
-.vscode/
 node_modules
 dist
 docker-compose.yml
@@ -13,3 +7,11 @@ jest.config.json
 *.md
 test/
 coverage/
+
+.prettierrc
+.eslintrc.js
+
+.git
+.gitignore
+.github
+.gitmodules

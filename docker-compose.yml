@@ -2,8 +2,8 @@ services:
   postgres:
     container_name: postgres
     build: 
-      dockerfile: Dockerfile.db
-      context: .
+      dockerfile: db/Dockerfile
+      context: ./
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -21,7 +21,7 @@ services:
     container_name: home-library-app
     build: 
       dockerfile: Dockerfile
-      context: .
+      context: ./
     volumes:
       - .:/app
     ports:

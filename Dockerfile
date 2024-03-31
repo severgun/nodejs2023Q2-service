@@ -1,4 +1,4 @@
-FROM node:20.11.1-alpine3.19 AS builder
+FROM node:20.11.1-slim AS builder
 
 WORKDIR /app
 
@@ -13,12 +13,13 @@ COPY . .
 
 RUN npm run build
 
-FROM node:20.11.1-alpine3.19
+FROM node:20.11.1-slim as prod
+
+RUN apt-get update -y && apt-get install -y openssl
 
 WORKDIR /app
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/package*.json .
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.env ./
