@@ -9,7 +9,7 @@ export class LoggingMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const { method, query, baseUrl, body } = req;
 
-    this.logger.log(
+    await this.logger.log(
       `${method}: ` +
         `BaseUrl: ${baseUrl}, ` +
         `Query: ${JSON.stringify(query)}, ` +
@@ -17,9 +17,9 @@ export class LoggingMiddleware implements NestMiddleware {
       'HttpRequest',
     );
 
-    res.on('finish', () => {
+    res.on('finish', async () => {
       const { statusCode, statusMessage } = res;
-      this.logger.log(
+      await this.logger.log(
         `${statusCode} ` +
           `${statusMessage}, ` +
           `(${method}: ` +
