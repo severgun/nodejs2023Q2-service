@@ -24,9 +24,9 @@ export class AuthService {
     });
 
     const tokens = await this.getTokens(newUser.id, newUser.login);
-    await this.updateRefreshToken(newUser.id, tokens.refresh_token);
+    await this.updateRefreshToken(newUser.id, tokens.refreshToken);
 
-    return tokens;
+    return { id: newUser.id, ...tokens };
   }
 
   async login(dto: SignupDto): Promise<Tokens> {
@@ -46,7 +46,7 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(user.id, user.login);
-    await this.updateRefreshToken(user.id, tokens.refresh_token);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return tokens;
   }
@@ -71,7 +71,7 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(user.id, user.login);
-    await this.updateRefreshToken(user.id, tokens.refresh_token);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return tokens;
   }
@@ -83,19 +83,20 @@ export class AuthService {
   async getTokens(userId: string, login: string): Promise<Tokens> {
     const payload = { userId, login };
 
-    const access_token = await this.jwtService.signAsync(payload, {
+    const accessToken = await this.jwtService.signAsync(payload, {
       expiresIn: process.env.JWT_ACCESS_TTL,
       secret: process.env.JWT_ACCESS_SECRET,
     });
 
-    const refresh_token = await this.jwtService.signAsync(payload, {
+    const refreshToken = await this.jwtService.signAsync(payload, {
       expiresIn: process.env.JWT_REFRESH_TTL,
       secret: process.env.JWT_REFRESH_SECRET,
     });
 
     return {
-      access_token,
-      refresh_token,
+      id: userId,
+      accessToken,
+      refreshToken,
     };
   }
 
